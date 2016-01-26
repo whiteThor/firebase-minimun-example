@@ -33,8 +33,10 @@ public class MainActivity extends AppCompatActivity {
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                Toast.makeText(MainActivity.this, snapshot.getValue().toString(), Toast.LENGTH_SHORT).show();
-                Log.e(getLocalClassName(), snapshot.getValue().toString());
+                if (snapshot.getValue() != null) {
+                    Toast.makeText(MainActivity.this, snapshot.getValue().toString(), Toast.LENGTH_SHORT).show();
+                    Log.e(getLocalClassName(), snapshot.getValue().toString());
+                }
             }
 
             @Override
