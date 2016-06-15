@@ -22,70 +22,65 @@ public class MainActivity extends AppCompatActivity {
   private String MESSAGE_CHILD = "message";
   private String WORDS_CHILD = "words";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
-      setContentView(R.layout.activity_main);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
 
-      database = FirebaseDatabase.getInstance();
+    database = FirebaseDatabase.getInstance();
 
-      DatabaseReference messageReference = database.getReference().child(MESSAGE_CHILD);
-      messageReference.setValue("Hello, World!");
+    DatabaseReference messageReference = database.getReference().child(MESSAGE_CHILD);
+    messageReference.setValue("Hello, World!");
 
-      messageReference.addValueEventListener(new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot snapshot) {
-            if (snapshot.getValue() != null) {
-              String value = snapshot.getValue(String.class);
-              showMessage(value);
-            }
+    messageReference.addValueEventListener(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot snapshot) {
+        if (snapshot.getValue() != null) {
+          String value = snapshot.getValue(String.class);
+          showMessage(value);
         }
+      }
 
+      @Override
+      public void onCancelled(DatabaseError error) {
+          Log.w(TAG, "Failed to read value.", error.toException());
+      }
+    });
+
+    DatabaseReference wordsReference = database.getReference().child(WORDS_CHILD);
+    wordsReference.addChildEventListener(new ChildEventListener() {
+      @Override
+      public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        showMessage(dataSnapshot.getValue().toString());
+      }
+
+      @Override
+      public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+      @Override
+      public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+      @Override
+      public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+
+      @Override
+      public void onCancelled(DatabaseError databaseError) {
+        Log.w(TAG, "Failed to read value.", databaseError.toException());
+      }
+    });
+
+
+    final Button btn = (Button)findViewById(R.id.button);
+    final EditText editText = (EditText)findViewById(R.id.editText);
+
+    btn.setOnClickListener(new View.OnClickListener() {
         @Override
-        public void onCancelled(DatabaseError error) {
-            Log.w(TAG, "Failed to read value.", error.toException());
+        public void onClick(View view) {
+          DatabaseReference newElementReference = database.getReference().child(WORDS_CHILD).push();
+          newElementReference.setValue(editText.getText().toString());
+          editText.setText("");
         }
-      });
-
-      DatabaseReference wordsReference = database.getReference().child(WORDS_CHILD);
-      wordsReference.addChildEventListener(new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-          showMessage(dataSnapshot.getValue().toString());
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-          Log.w(TAG, "Failed to read value.", databaseError.toException());
-        }
-      });
-
-
-      final Button btn = (Button)findViewById(R.id.button);
-      final EditText editText = (EditText)findViewById(R.id.editText);
-
-      btn.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View view) {
-            DatabaseReference newElementReference = database.getReference().child(WORDS_CHILD).push();
-            newElementReference.setValue(editText.getText().toString());
-            editText.setText("");
-          }
-      });
-
+    });
   }
 
   public void showMessage(String msg) {
